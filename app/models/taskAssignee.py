@@ -7,13 +7,13 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column,relationship
 
 from app.models.base import Base
 
 
 class TaskAssignee(Base):
-    __tablename__ = "task_assignees"
+    __tablename__ = "taskAssignee"
 
     __table_args__ = (
         UniqueConstraint(
@@ -28,13 +28,13 @@ class TaskAssignee(Base):
     )
 
     task_id: Mapped[int] = mapped_column(
-        ForeignKey("tasks.id", ondelete="CASCADE"),
+        ForeignKey("task.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
+        ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
@@ -43,4 +43,14 @@ class TaskAssignee(Base):
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False
+    )
+
+    task: Mapped['task'] = relationship(
+        back_populates='assignees',
+        foreign_keys=[task_id]
+    )
+
+    user: Mapped['user'] = relationship(
+        back_populates='task_assignments',
+        foreign_keys=[user_id]
     )

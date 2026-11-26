@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped,mapped_column, relationship
 from app.models.base import Base
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'user'
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(String(100),
@@ -15,19 +15,22 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50),
                                           unique=True,
                                           nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(100),
+    hashed_password: Mapped[str] = mapped_column(String(255),
                                                  nullable=False)
     role: Mapped[str] = mapped_column(String(50),
                                       default='member',
+                                      server_default='member',
                                       nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean,
                                             default=True,
+                                            server_default='true',
                                             nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                          server_default=func.now(),
                                                          nullable=False)
-    update_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                 server_default=func.now(),
+                                                 onupdate=func.now(),
                                                 nullable=False)
 
     owned_project: Mapped[list['project']] = relationship(
@@ -36,8 +39,7 @@ class User(Base):
     )
     project_members: Mapped[list['project_member']] = relationship(
         back_populates='user',
-        cascade='all, delete-orphan',
-        passive_deletes=True
+        foreign_keys='project_member.user_id'
     )
     created_tasks = Mapped[list['task']] = relationship(
         back_populates='created_by',
@@ -46,16 +48,18 @@ class User(Base):
 
     task_assignments = Mapped[list['taskAssignee']] = relationship(
         back_populates='user',
-        cascade='all, delete-orphan',
-        passive_deletes=True
-    )
+        foreign_keys='taskAssignee.user_id'
+        )
 
     comments = Mapped[list['comment']] = relationship(
         back_populates='author',
         foreign_keys='comment.author_id'
     )
 
-
+    change_history_entries = Mapped[list['change_history']] = relationship(
+        back_populates='changed_by',
+        foreign_keys='change_history.changed_by_id'
+    )
 
 
 
