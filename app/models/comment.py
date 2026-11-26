@@ -7,26 +7,26 @@ from sqlalchemy import (
     ForeignKey,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
 
 
 class Comment(Base):
-    __tablename__ = "comments"
+    __tablename__ = "comment"
 
     id: Mapped[int] = mapped_column(
         primary_key=True
     )
 
     task_id: Mapped[int] = mapped_column(
-        ForeignKey("tasks.id", ondelete="CASCADE"),
+        ForeignKey("task.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
 
     author_id: Mapped[int | None] = mapped_column(
-        ForeignKey("users.id", ondelete="SET NULL"),
+        ForeignKey("user.id", ondelete="SET NULL"),
         nullable=True,
         index=True
     )
@@ -47,4 +47,14 @@ class Comment(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False
+    )
+
+    task: Mapped['task'] = relationship(
+        back_populates='comments',
+        foreign_keys=[task_id]
+    )
+
+    author: Mapped['user | None'] = relationship(
+        back_populates='comment',
+        foreign_keys=[author_id]
     )

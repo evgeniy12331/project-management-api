@@ -8,20 +8,20 @@ from sqlalchemy import (
     ForeignKey,
     func,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column,relationship
 
 from app.models.base import Base
 
 
 class Subtask(Base):
-    __tablename__ = "subtasks"
+    __tablename__ = "subtask"
 
     id: Mapped[int] = mapped_column(
         primary_key=True
     )
 
     task_id: Mapped[int] = mapped_column(
-        ForeignKey("tasks.id", ondelete="CASCADE"),
+        ForeignKey("task.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
@@ -53,4 +53,9 @@ class Subtask(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False
+    )
+
+    task: Mapped['task'] = relationship(
+        back_populates='subtask',
+        foreign_keys=[task_id]
     )
